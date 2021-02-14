@@ -66,9 +66,9 @@ wss.on('connection', (ws) => {
             client.send(calendar.GetCurrentDayAndMonth());
             client.send(calendar.GetDayMonth());
             client.send("CurrentDate:" + calendar.GetDayMonthNumber());
-            ws.send("Year:" + calendar.CurrentYear);
+            client.send("Year:" + calendar.CurrentYear);
             for (let i = 0; i < Events.length; i++) {
-                ws.send("EventDate:" + Events[i].GetEventDate());
+                client.send("EventDate:" + Events[i].GetEventDate());
             }
         });
 

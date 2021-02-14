@@ -217,11 +217,12 @@ function CreateCalendar(data) {
 }
 
 function clickDay(e) {
-    let day = e.path[0].innerText;
-    let month = e.path[1].id.replace(/([a-z]|[A-Z])/g, '');
     
     console.log(e);
-    let year = e.srcElement.attributes[1].value;
+    let day = e.target.innerText;
+    let month = e.target.parentElement.id.replace(/([a-z]|[A-Z])/g, '');
+    
+    let year = e.srcElement.getAttribute('year');
     console.log('day ' + day + ' Month ' + month);
     socket.send("GetEvent:" + day + ',' + month + '.' + year);
 }
