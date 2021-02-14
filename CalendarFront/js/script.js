@@ -2,18 +2,23 @@ let socket = new WebSocket("ws://localhost:8080");
 var daysOfTheWeek = [];
 var MonthsOfTheYear = [];
 var DaysInYear = -1;
+var CurrentYear = -1;
 socket.onopen = function (e) {
     console.log("Connected to Backend");
 }
 
 socket.onmessage = function (event) {
-    //console.log(event.data);
+    console.log(event.data);
     if (typeof event.data === 'string' && event.data.startsWith('Calendar:')) {
         CreateCalendar(event.data);
     }
 
     if (typeof event.data === 'string' && event.data.startsWith('Date:')) {
         document.getElementById("CurrentDate").innerHTML = "The Current Date is " + event.data.replace("Date:", '');
+
+    }
+    if (typeof event.data === 'string' && event.data.startsWith('Year:')) {
+        CurrentYear = event.data.replace("Year:", '');
 
     }
     if (typeof event.data === 'string' && event.data.startsWith('CurrentDate:')) {
@@ -40,6 +45,48 @@ socket.onmessage = function (event) {
     if (typeof event.data === 'string' && event.data.startsWith('Months:')) {
         MonthsOfTheYear = event.data.replaceAll(',', ' ').replace('Months:', '').split(' ');
     }
+    if (typeof event.data === 'string' && event.data.startsWith('EventData:')) {
+        let data = event.data.replace("EventData:", '');
+        let slider = document.getElementsByClassName('slider-parent')[0];
+        let title = document.getElementById("Title");
+        let date = document.getElementById("Date");  
+        let occurance = document.getElementById("Occurance");    
+        let description = document.getElementById("Description");    
+
+        data = JSON.parse(data);
+        
+        title.innerText = data.EventTitle;
+        date.innerText = "Date: "+GetDayNumberWithOrdinal(data.EventDay)+ " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
+        occurance.innerText = data.IsAnnual?"Occurs Annually":"Occurs Once";
+        description.innerText = data.EventDescription;
+        console.log(data);
+        slider.classList.add("active");
+        
+
+
+    }
+    if (typeof event.data === 'string' && event.data.startsWith('EventDate:')) {
+        let date = event.data.replace("EventDate:", '');
+        let day = date.replace(/(,[0-9]+)/g, '').replace(/(\.[0-9]+)/g, '').replace(/(\.-[0-9]+)/g, '');
+        let month = date.replace(/([0-9]+,)/g, '').replace(/(\.[0-9]+)/g, '').replace(/(\.-[0-9]+)/g, '');
+        let year = date.replace(/([0-9]+,[0-9]+\.)/g, '');
+        let monthDiv = document.getElementById("MonthDiv" + month);
+        let childIndex = -1;
+
+        if (year == CurrentYear || year == -1) {
+            for (let i = 0; i < monthDiv.childElementCount; i++) {
+                if (monthDiv.children[i].innerHTML == day) {
+                    childIndex = i;
+                    break;
+                }
+            }
+
+            monthDiv.children[childIndex].style.borderColor = "green";
+            monthDiv.children[childIndex].style.borderWidth = "thick";
+            monthDiv.children[childIndex].setAttribute("Year",year);
+
+        }
+    }
 }
 
 socket.onclose = function (e) {
@@ -55,9 +102,9 @@ window.onload = function () {
         socket.send("RewindDay");
     });
     document.getElementById("setDayButton").addEventListener("click", function () {
-        if(document.getElementById("DayInput").value <= DaysInYear){
-        socket.send("SetDay" + document.getElementById("DayInput").value);
-        }else{
+        if (document.getElementById("DayInput").value <= DaysInYear) {
+            socket.send("SetDay" + document.getElementById("DayInput").value);
+        } else {
             alert("Please Enter Valid Numbers!")
         }
     });
@@ -67,11 +114,28 @@ window.onload = function () {
             socket.send("SetYear" + document.getElementById("YearInput").value);
             socket.send("SetMonth" + document.getElementById("MonthInput").value);
             socket.send("SetDay" + document.getElementById("DayInput").value);
-        }else{
+        } else {
             alert("Please Enter Valid Numbers!")
         }
 
     });
+
+    let slider = document.getElementsByClassName('slider-parent')[0]; 
+    let slidertrigger = document.getElementsByClassName("slider-trigger");
+for (let i = 0; i < slidertrigger.length; i++) {
+ let element = slidertrigger[i];
+    element.addEventListener("click", function (el) {
+        if (slider.classList.contains("active")) {
+            slider.classList.remove("active");
+        } else {
+            slider.classList.add("active");
+        }
+    });
+    
+}
+
+    
+
 }
 
 function CreateCalendar(data) {
@@ -146,9 +210,20 @@ function CreateCalendar(data) {
 
         let day = document.createElement("td");
         day.id = "Day";
-        day.innerText = dayNumber;//daysOfTheWeek[parseInt(weekNumber)] + ' ' + 
+        day.innerText = dayNumber;
+        day.addEventListener("click", clickDay);
         document.getElementById("MonthDiv" + monthNumber).appendChild(day);
     }
+}
+
+function clickDay(e) {
+    let day = e.path[0].innerText;
+    let month = e.path[1].id.replace(/([a-z]|[A-Z])/g, '');
+    
+    console.log(e);
+    let year = e.srcElement.attributes[1].value;
+    console.log('day ' + day + ' Month ' + month);
+    socket.send("GetEvent:" + day + ',' + month + '.' + year);
 }
 
 function AddBlankDays(weekNumber, monthNumber) {
@@ -168,3 +243,59 @@ function AddWeekNamesToTable(monthNumber) {
         document.getElementById("tabler" + monthNumber).appendChild(dayNames);
     }
 }
+
+function GetDayNumberWithOrdinal(dayNumber){
+    dayNumber = parseInt(dayNumber);
+    let lastDigitOfDay = parseInt(dayNumber.toString().split('').pop());
+    let dayPlusOrdinal = '';
+    if (dayNumber > 10 && dayNumber < 14) {
+        switch (lastDigitOfDay) {
+            case 1:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 2:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 3:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+        }
+    } else {
+        switch (lastDigitOfDay) {
+            case 0:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 1:
+                dayPlusOrdinal = dayNumber + 'st';
+                break;
+            case 2:
+                dayPlusOrdinal = dayNumber + 'nd';
+                break;
+            case 3:
+                dayPlusOrdinal = dayNumber + 'rd';
+                break;
+            case 4:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 5:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 6:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 7:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 8:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+            case 9:
+                dayPlusOrdinal = dayNumber + 'th';
+                break;
+        }
+    }
+    return dayPlusOrdinal;
+}
+
+
+
