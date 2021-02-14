@@ -1,7 +1,7 @@
 FantasyCalendar
 
 This allows for calendars to be created and shared with players of games like DnD. <br>
-![](https://imgur.com/ooaITal)
+![gif of calendar](https://i.imgur.com/ooaITal.gif)
 TODO:<br>
 Add events<br>
 Add day highlighting for events<br>
