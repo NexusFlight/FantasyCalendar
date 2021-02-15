@@ -17,9 +17,9 @@ Events.push(new Event('Renewal Festival', 'The festival marking the start of spr
 Events.push(new Event('Wild\'s Grandeur', 'Witness the Magjesty of nature!', 20, 2, true));
 
 Events.push(new Event('Harvest\'s Ride', '', 11, 3, true));
-Events.push(new Event('Merryfrond\'s Day', '', 31, 3, true));
-
-
+Events.push(new Event('Merryfrond\'s Day', 'This is a couple of lines of text just to test the box', 31, 3, true));
+Events.push(new Event('Andrews Day', 'This is a couple of lines of text just to test the box', 31, 3, true));
+Events.push(new Event('france Day', 'This is a couple of lines of text just to test the box', 31, 3, false, 1));
 
 
 wss.on('connection', (ws) => {
@@ -53,7 +53,7 @@ wss.on('connection', (ws) => {
             let date = data.replace("GetEvent:", '');
             for (let i = 0; i < Events.length; i++) {
                 let event = Events[i];
-                if(event.GetEventDate() === date){
+                if(event.GetEventDate() === date || event.GetEventDate().includes("-1")){
                     ws.send("EventData:"+JSON.stringify(event));
                 }
                 

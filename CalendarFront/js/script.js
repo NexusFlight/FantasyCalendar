@@ -47,23 +47,7 @@ socket.onmessage = function (event) {
     }
     if (typeof event.data === 'string' && event.data.startsWith('EventData:')) {
         let data = event.data.replace("EventData:", '');
-        let slider = document.getElementsByClassName('slider-parent')[0];
-        let title = document.getElementById("Title");
-        let date = document.getElementById("Date");  
-        let occurance = document.getElementById("Occurance");    
-        let description = document.getElementById("Description");    
-
-        data = JSON.parse(data);
-        
-        title.innerText = data.EventTitle;
-        date.innerText = "Date: "+GetDayNumberWithOrdinal(data.EventDay)+ " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
-        occurance.innerText = data.IsAnnual?"Occurs Annually":"Occurs Once";
-        description.innerText = data.EventDescription;
-        console.log(data);
-        slider.classList.add("active");
-        
-
-
+        CreateEventOnMessage(data);
     }
     if (typeof event.data === 'string' && event.data.startsWith('EventDate:')) {
         let date = event.data.replace("EventDate:", '');
@@ -83,10 +67,11 @@ socket.onmessage = function (event) {
 
             monthDiv.children[childIndex].style.borderColor = "green";
             monthDiv.children[childIndex].style.borderWidth = "thick";
-            monthDiv.children[childIndex].setAttribute("Year",year);
+            monthDiv.children[childIndex].setAttribute("Year", year);
 
         }
     }
+
 }
 
 socket.onclose = function (e) {
@@ -120,21 +105,21 @@ window.onload = function () {
 
     });
 
-    let slider = document.getElementsByClassName('slider-parent')[0]; 
+    let slider = document.getElementsByClassName('slider-parent')[0];
     let slidertrigger = document.getElementsByClassName("slider-trigger");
-for (let i = 0; i < slidertrigger.length; i++) {
- let element = slidertrigger[i];
-    element.addEventListener("click", function (el) {
-        if (slider.classList.contains("active")) {
-            slider.classList.remove("active");
-        } else {
-            slider.classList.add("active");
-        }
-    });
-    
-}
+    for (let i = 0; i < slidertrigger.length; i++) {
+        let element = slidertrigger[i];
+        element.addEventListener("click", function (el) {
+            if (slider.classList.contains("active")) {
+                slider.classList.remove("active");
+            } else {
+                slider.classList.add("active");
+            }
+        });
 
-    
+    }
+
+
 
 }
 
@@ -216,12 +201,66 @@ function CreateCalendar(data) {
     }
 }
 
+function CreateEventOnMessage(data){
+        let slider = document.getElementsByClassName('slider-parent')[0];
+        let title = document.getElementById("Title");
+        let date = document.getElementById("Date");
+        let occurance = document.getElementById("Occurance");
+        let description = document.getElementsByClassName("Description")[0];
+
+        data = JSON.parse(data);
+        let day = data.EventDay;
+        let month = data.EventMonth;
+        let year = data.EventYear;
+
+        let monthDiv = document.getElementById("MonthDiv" + month);
+        let childIndex = -1;
+
+        if (year == CurrentYear || year == -1) {
+            for (let i = 0; i < monthDiv.childElementCount; i++) {
+                if (monthDiv.children[i].innerHTML == day) {
+                    childIndex = i;
+                }
+            }
+        }
+
+        if (monthDiv.children[childIndex].getAttribute("event") !== "Created") {
+            title.innerText = data.EventTitle;
+            date.innerText = "Date: " + GetDayNumberWithOrdinal(data.EventDay) + " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
+            occurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
+            description.innerText = data.EventDescription;
+
+            console.log(data);
+            slider.classList.add("active");
+            monthDiv.children[childIndex].setAttribute("event", "Created");
+        } else {
+            let oldDescriptions = document.getElementsByClassName("Description");
+            let oldDescription = oldDescriptions[oldDescriptions.length-1];
+
+            let otherTitle = document.createElement("h1");
+            otherTitle.id = "Title";
+            otherTitle.innerText = data.EventTitle;
+            oldDescription.appendChild(otherTitle);
+
+            let otherOccurance = document.createElement("p");
+            otherOccurance.id = "Occurance";
+            otherOccurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
+            otherTitle.parentNode.appendChild(otherOccurance);
+
+            let otherDescription = document.createElement("p");
+            otherDescription.className = "Description";
+            otherDescription.innerText = data.EventDescription;
+            otherOccurance.appendChild(otherDescription);
+
+        }
+}
+
 function clickDay(e) {
-    
+
     console.log(e);
     let day = e.target.innerText;
     let month = e.target.parentElement.id.replace(/([a-z]|[A-Z])/g, '');
-    
+
     let year = e.srcElement.getAttribute('year');
     console.log('day ' + day + ' Month ' + month);
     socket.send("GetEvent:" + day + ',' + month + '.' + year);
@@ -245,7 +284,7 @@ function AddWeekNamesToTable(monthNumber) {
     }
 }
 
-function GetDayNumberWithOrdinal(dayNumber){
+function GetDayNumberWithOrdinal(dayNumber) {
     dayNumber = parseInt(dayNumber);
     let lastDigitOfDay = parseInt(dayNumber.toString().split('').pop());
     let dayPlusOrdinal = '';
@@ -297,6 +336,5 @@ function GetDayNumberWithOrdinal(dayNumber){
     }
     return dayPlusOrdinal;
 }
-
 
 
