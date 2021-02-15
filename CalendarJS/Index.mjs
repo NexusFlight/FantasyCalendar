@@ -22,8 +22,12 @@ wss.on('connection', (ws) => {
         ws.send("EventDate:" + Events[i].GetEventDate());
     }
 
+    ws.on('close', (data) =>{
+        fileHander.SaveCalendarToFile(calendar, calendar.CalendarName);
+    });
 
     ws.on('message', (data) => {
+        let changes = false;
         if (data === 'NextDay') {
             calendar.ProgressOneDay();
         } else if (data.includes("RewindDay")) {
@@ -40,17 +44,15 @@ wss.on('connection', (ws) => {
             calendar.SetYear(data.replace('SetYear', ''));
         } else if (data.includes("GetEvent")) {
             let date = data.replace("GetEvent:", '');
-            let annualDate = date.replace(/(\.[0-9]+)/g,".-1");
+            let annualDate = date.replace(/(\.[0-9]+)/g, ".-1");
             for (let i = 0; i < Events.length; i++) {
                 let event = Events[i];
-                if(event.GetEventDate() === date || event.GetEventDate()=== annualDate){
-                    ws.send("EventData:"+JSON.stringify(event));
+                if (event.GetEventDate() === date || event.GetEventDate() === annualDate) {
+                    ws.send("EventData:" + JSON.stringify(event));
                 }
-                
+
             }
         }
-        fileHander.SaveCalendarToFile(calendar,calendar.CalendarName);
-
 
         wss.clients.forEach((client) => {
             client.send(calendar.GetCurrentDayAndMonth());
