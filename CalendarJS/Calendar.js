@@ -1,18 +1,32 @@
 class Calendar {
-    constructor() {
-        this.CurrentYear = 1;
-        this.DaysInMonths = [29, 30, 30, 31, 28, 31, 32, 29, 27, 29, 32]
-        this.MonthsInYear = this.DaysInMonths.length;
-        this.DaysInYear = this.DaysInMonths.reduce((a, b) => { return a + b; }, 0);
-        this.MonthNames = ['Horisal', 'Misuthar', 'Dualahei', 'Thunsheer', 'Unndilar', 'Brussendar', 'Sydenstar', 'Fessuran', 'Quen\'pillar', 'Cuersaar', 'Duscar'];
-        this.DayNames = ['Miresen', 'Crissen', 'Whelsen', 'Conthsen', 'Folson', 'Yulisen', 'Da\'leysen'];
-        this.DaysInWeek = this.DayNames.length;
-        this.MonthDays = [];
-        this.LeapYearMonths = [];
+    constructor(calendarName,currentYear,dayInMonths,monthsInYear,daysInYear,monthNames,dayNames,daysInWeek,monthDays,leapYearMonths,currentDay) {
+        this.CalendarName = calendarName;
+        this.CurrentYear = currentYear;
+        this.DaysInMonths = dayInMonths;
+        this.MonthsInYear = monthsInYear;
+        this.DaysInYear = daysInYear;
+        this.MonthNames = monthNames;
+        this.DayNames = dayNames;
+        this.DaysInWeek = daysInWeek;
+        this.MonthDays = monthDays;
+        this.LeapYearMonths = leapYearMonths;
+        this.CurrentDay = currentDay;
 
-        this.CurrentDay = 1;
+        
 
-        this.SetMonthDays();
+        // this.CalendarName = "Exandria";
+        // this.CurrentYear = 1;
+        // this.DaysInMonths = [29, 30, 30, 31, 28, 31, 32, 29, 27, 29, 32]
+        // this.MonthsInYear = this.DaysInMonths.length;
+        // this.DaysInYear = this.DaysInMonths.reduce((a, b) => { return a + b; }, 0);
+        // this.MonthNames = ['Horisal', 'Misuthar', 'Dualahei', 'Thunsheer', 'Unndilar', 'Brussendar', 'Sydenstar', 'Fessuran', 'Quen\'pillar', 'Cuersaar', 'Duscar'];
+        // this.DayNames = ['Miresen', 'Crissen', 'Whelsen', 'Conthsen', 'Folson', 'Yulisen', 'Da\'leysen'];
+        // this.DaysInWeek = this.DayNames.length;
+        // this.MonthDays = [];
+        // this.LeapYearMonths = [];
+        // this.CurrentDay = 2;
+
+        // this.SetMonthDays();
     }
 
 
@@ -238,6 +252,9 @@ class Calendar {
         
         return formatted;
     }
+
+   
+    
 }
 module.exports = Calendar;
 
