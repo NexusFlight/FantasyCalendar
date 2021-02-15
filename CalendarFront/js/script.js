@@ -112,6 +112,20 @@ window.onload = function () {
         element.addEventListener("click", function (el) {
             if (slider.classList.contains("active")) {
                 slider.classList.remove("active");
+                
+                for (let j = 0; j < MonthsOfTheYear.length; j++) {
+                    let monthDiv = document.getElementById("MonthDiv" + j);    
+                    for (let i = 0; i < monthDiv.childElementCount; i++) {
+                        if (monthDiv.children[i].getAttribute("event") == "Created") {
+                            monthDiv.children[i].setAttribute("event","");
+                        }
+                    }                    
+                }
+
+                let eventTag = document.getElementById("event")
+                eventTag.innerHTML =  "<h1 id='Title'>Slider</h1><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
+
+                
             } else {
                 slider.classList.add("active");
             }
@@ -201,58 +215,58 @@ function CreateCalendar(data) {
     }
 }
 
-function CreateEventOnMessage(data){
-        let slider = document.getElementsByClassName('slider-parent')[0];
-        let title = document.getElementById("Title");
-        let date = document.getElementById("Date");
-        let occurance = document.getElementById("Occurance");
-        let description = document.getElementsByClassName("Description")[0];
+function CreateEventOnMessage(data) {
+    let slider = document.getElementsByClassName('slider-parent')[0];
+    let title = document.getElementById("Title");
+    let date = document.getElementById("Date");
+    let occurance = document.getElementById("Occurance");
+    let description = document.getElementsByClassName("Description")[0];
 
-        data = JSON.parse(data);
-        let day = data.EventDay;
-        let month = data.EventMonth;
-        let year = data.EventYear;
+    data = JSON.parse(data);
+    let day = data.EventDay;
+    let month = data.EventMonth;
+    let year = data.EventYear;
 
-        let monthDiv = document.getElementById("MonthDiv" + month);
-        let childIndex = -1;
+    let monthDiv = document.getElementById("MonthDiv" + month);
+    let childIndex = -1;
 
-        if (year == CurrentYear || year == -1) {
-            for (let i = 0; i < monthDiv.childElementCount; i++) {
-                if (monthDiv.children[i].innerHTML == day) {
-                    childIndex = i;
-                }
+    if (year == CurrentYear || year == -1) {
+        for (let i = 0; i < monthDiv.childElementCount; i++) {
+            if (monthDiv.children[i].innerHTML == day) {
+                childIndex = i;
             }
         }
+    }
 
-        if (monthDiv.children[childIndex].getAttribute("event") !== "Created") {
-            title.innerText = data.EventTitle;
-            date.innerText = "Date: " + GetDayNumberWithOrdinal(data.EventDay) + " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
-            occurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
-            description.innerText = data.EventDescription;
+    if (monthDiv.children[childIndex].getAttribute("event") !== "Created") {
+        title.innerText = data.EventTitle;
+        date.innerText = "Date: " + GetDayNumberWithOrdinal(data.EventDay) + " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
+        occurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
+        description.innerText = data.EventDescription;
 
-            console.log(data);
-            slider.classList.add("active");
-            monthDiv.children[childIndex].setAttribute("event", "Created");
-        } else {
-            let oldDescriptions = document.getElementsByClassName("Description");
-            let oldDescription = oldDescriptions[oldDescriptions.length-1];
+        console.log(data);
+        slider.classList.add("active");
+        monthDiv.children[childIndex].setAttribute("event", "Created");
+    } else {
+        let oldDescriptions = document.getElementsByClassName("Description");
+        let oldDescription = oldDescriptions[oldDescriptions.length - 1];
 
-            let otherTitle = document.createElement("h1");
-            otherTitle.id = "Title";
-            otherTitle.innerText = data.EventTitle;
-            oldDescription.appendChild(otherTitle);
+        let otherTitle = document.createElement("h1");
+        otherTitle.id = "Title";
+        otherTitle.innerText = data.EventTitle;
+        oldDescription.appendChild(otherTitle);
 
-            let otherOccurance = document.createElement("p");
-            otherOccurance.id = "Occurance";
-            otherOccurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
-            otherTitle.parentNode.appendChild(otherOccurance);
+        let otherOccurance = document.createElement("p");
+        otherOccurance.id = "Occurance";
+        otherOccurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
+        otherTitle.parentNode.appendChild(otherOccurance);
 
-            let otherDescription = document.createElement("p");
-            otherDescription.className = "Description";
-            otherDescription.innerText = data.EventDescription;
-            otherOccurance.appendChild(otherDescription);
+        let otherDescription = document.createElement("p");
+        otherDescription.className = "Description";
+        otherDescription.innerText = data.EventDescription;
+        otherOccurance.appendChild(otherDescription);
 
-        }
+    }
 }
 
 function clickDay(e) {

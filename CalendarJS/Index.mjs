@@ -51,9 +51,10 @@ wss.on('connection', (ws) => {
             calendar.SetYear(data.replace('SetYear', ''));
         } else if (data.includes("GetEvent")) {
             let date = data.replace("GetEvent:", '');
+            let annualDate = date.replace(/(\.[0-9]+)/g,".-1");
             for (let i = 0; i < Events.length; i++) {
                 let event = Events[i];
-                if(event.GetEventDate() === date || event.GetEventDate().includes("-1")){
+                if(event.GetEventDate() === date || event.GetEventDate()=== annualDate){
                     ws.send("EventData:"+JSON.stringify(event));
                 }
                 

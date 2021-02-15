@@ -6,21 +6,25 @@ table, th, td {
 
 /* Slider Gubbins */
   .slider-container   {  
-    position: relative; 
+    position: absolute; 
+    top: 50px;
+    max-width: 250px;
+    width: 100%;
+    z-index: 100; 
   }  
 
   .slider-container .slider-parent {    
-    height: 70vh;    
+    height: 90vh;    
     max-width: 250px;    
     width: 100%;    
     background: #6C7A89;    
     position: absolute;    
-    left: -250px;    
-    top: 50px;    
+    left: -250px;     
     visibility: hidden;    
     opacity: 0;    
     pointer-events: none;    
     transition: .2s all linear; 
+    z-index: 1000;
   }
 
   .slider-container .slider-parent.active {      
@@ -29,4 +33,5 @@ table, th, td {
     transition: .2s all ease-in-out;      
     opacity: 1;      
     left: 0; 
+    z-index: 1000;
   }
