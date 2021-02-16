@@ -58,6 +58,35 @@ class FileHander {
         }
         return events;
     }
+
+    SaveUserToFile(user){
+        let fs = require('fs');
+        let dir ="./Users/";
+        if(!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+        
+        let contents = JSON.stringify(user);
+        fs.writeFile(dir+user.UserName+".txt",contents, function (err){
+            if(err){
+                console.log(err);
+            }
+            console.log("The file was saved!");
+        });
+    }
+
+    ReadUserFromFile(userName,userCode){
+        let fs = require('fs');
+        let User = require('./User.js')
+        let dir ="./Users/";
+        
+        let data = fs.readFileSync(dir+userName+".txt");
+        let json = JSON.parse(data);
+        if(json.UserCode  === userCode){
+        return new User(json.UserName,json.UserCode,json.UserRole);
+        }
+        return -1;
+    }
 }
 
 module.exports = FileHander;
