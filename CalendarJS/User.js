@@ -7,7 +7,7 @@ constructor(userName,userCode,userRole){
 }
 
 IsUserDM(){
-    return this.UserRole === "DM";
+    return (this.UserRole === "DM");
 }
 
 SetUserClient(client){

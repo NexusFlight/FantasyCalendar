@@ -24,7 +24,8 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         if (Users.length > 0) {
             let user = Users.find(element => element.UserClient === wss.client);
-            if (user.UserRole === "DM") {
+
+            if (user.IsUserDM()) {
 
                 if (data === 'NextDay') {
                     calendar.ProgressOneDay();
@@ -40,17 +41,8 @@ wss.on('connection', (ws) => {
                     calendar.SetMonth(data.replace('SetMonth', ''));
                 } else if (data.includes("SetYear")) {
                     calendar.SetYear(data.replace('SetYear', ''));
-                } else if (data.includes("GetEvent")) {
-                    let date = data.replace("GetEvent:", '');
-                    let annualDate = date.replace(/(\.[0-9]+)/g, ".-1");
-                    for (let i = 0; i < Events.length; i++) {
-                        let event = Events[i];
-                        if (event.GetEventDate() === date || event.GetEventDate() === annualDate) {
-                            ws.send("EventData:" + JSON.stringify(event));
-                        }
-
-                    }
                 }
+
             }
         }
         if (data.startsWith("Login:")) {
@@ -65,6 +57,16 @@ wss.on('connection', (ws) => {
                 Users.push(user);
             } else {
                 ws.send("Login Unsuccessful");
+            }
+        } else if (data.includes("GetEvent")) {
+            let date = data.replace("GetEvent:", '');
+            let annualDate = date.replace(/(\.[0-9]+)/g, ".-1");
+            for (let i = 0; i < Events.length; i++) {
+                let event = Events[i];
+                if (event.GetEventDate() === date || event.GetEventDate() === annualDate) {
+                    ws.send("EventData:" + JSON.stringify(event));
+                }
+
             }
         }
 
