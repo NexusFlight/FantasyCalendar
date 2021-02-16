@@ -52,8 +52,8 @@ wss.on('connection', (ws) => {
 
             }
         }
-        if (data.startsWith("Login:")) {
-            let userAndCode = data.replace("Login:", '');
+        if (data.startsWith("Login")) {
+            let userAndCode = data.replace("Login", '');
             if (userAndCode !== ".") {
                 let userName = userAndCode.replace(/(\.[a-z0-9]+)/gi, '');
                 let userCode = userAndCode.replace(/([a-z0-9]+\.)/gi, '');
@@ -73,13 +73,14 @@ wss.on('connection', (ws) => {
         } else if (data.startsWith("LogOut")) {
             let user = Users.find(element => element.UserClient === guid);
             let status = -1;
+            console.log(user);
+            console.log(guid);
             if (typeof user !== "undefined") {
                 let index = Users.indexOf(user);
                 status = Users.splice(index, 1);
             }
             if (status.length !== 0 && status != -1) {
                 ws.send("Logout Successful.");
-                console.log(status);
             } else {
                 ws.send("Logout Unsuccessful.");
             }

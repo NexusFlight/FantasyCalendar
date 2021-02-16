@@ -103,10 +103,10 @@ window.onload = function () {
         socket.send("RewindDay,,,"+localStorage.getItem("guid"));
     });
     document.getElementById("Login").addEventListener("click", function () {
-        socket.send("Login:"+document.getElementById("UserName").value+"."+document.getElementById("Password").value);
+        socket.send("Login"+document.getElementById("UserName").value+"."+document.getElementById("Password").value);
     });
     document.getElementById("Logout").addEventListener("click", function () {
-        socket.send("LogOut:");
+        socket.send("LogOut,,,"+localStorage.getItem("guid"));
     });
     document.getElementById("setDayButton").addEventListener("click", function () {
         if (document.getElementById("DayInput").value <= DaysInYear) {
