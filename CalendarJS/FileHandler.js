@@ -66,7 +66,7 @@ class FileHander {
             fs.mkdirSync(dir);
         }
         
-        let contents = JSON.stringify(user);
+        let contents = JSON.stringify(user,["UserName","UserCode","UserRole"]);
         fs.writeFile(dir+user.UserName+".txt",contents, function (err){
             if(err){
                 console.log(err);

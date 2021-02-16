@@ -1,6 +1,7 @@
 import WebSocket from './ws/index.js';
 import FileHander from './FileHandler.js';
 import User from './User.js';
+import {Guid} from 'js-guid';
 
 const wss = new WebSocket.Server({
     port: 8080,
@@ -22,10 +23,16 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('message', (data) => {
+        let guid = data.replace(/([0-9a-z]+,,,)/gi, "");
+        let location = data.indexOf(guid);
+        if(location != 0){
+        data = data.substring(0,location-3);
+        }
         if (Users.length > 0) {
-            let user = Users.find(element => element.UserClient === wss.client);
 
-            if (user.IsUserDM()) {
+            let user = Users.find(element => element.UserClient === guid);
+            
+            if (typeof user !== "undefined" && user.IsUserDM()) {
 
                 if (data === 'NextDay') {
                     calendar.ProgressOneDay();
@@ -53,21 +60,22 @@ wss.on('connection', (ws) => {
                 var user = fileHander.ReadUserFromFile(userName, userCode);
 
                 if (user !== -1) {
-                    user.SetUserClient(wss.client);
+                    user.SetUserClient(Guid.newGuid().toString());
                     Users.push(user);
-                    ws.send("Login Successful." + user.UserRole);
+                    ws.send("Login Successful.." + user.UserRole+","+user.UserClient);
                 } else {
-                    ws.send("Login Unsuccessful");
+                    ws.send("Login Unsuccessful.");
                 }
             }
         } else if (data.startsWith("LogOut")) {
-            let user = Users.find(element => element.UserClient === wss.client);
+            let user = Users.find(element => element.UserClient === guid);
             let index = Users.indexOf(user);
             let status = Users.splice(index, 1);
-            if (status) {
-                ws.send("Logout Successful");
+
+            if (status.length !== 0) {
+                ws.send("Logout Successful.");
             } else {
-                ws.send("Logout Unsuccessful");
+                ws.send("Logout Unsuccessful.");
             }
         } else if (data.startsWith("GetEvent")) {
             let date = data.replace("GetEvent:", '');

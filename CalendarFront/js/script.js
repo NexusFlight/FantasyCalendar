@@ -1,4 +1,4 @@
-let socket = new WebSocket("ws://localhost:8080");
+let socket = new WebSocket("ws://192.168.1.226:8080");
 var daysOfTheWeek = [];
 var MonthsOfTheYear = [];
 var DaysInYear = -1;
@@ -8,13 +8,19 @@ socket.onopen = function (e) {
 }
 
 socket.onmessage = function (event) {
+    
     console.log(event.data);
     if (typeof event.data === 'string' && event.data.startsWith('Calendar:')) {
         CreateCalendar(event.data);
     }
     if (typeof event.data === 'string' && (event.data.startsWith('Login') || event.data.startsWith('Logout'))) {
-        let role = event.data.replace(/([a-z]+\s[a-z]+\.)/gi, "");
-        let loginStatus = event.data.replace(/(\.[a-z]+)/gi,"");
+        let role = event.data.replace(/(,[0-9a-z]+)/gi,"").replace(/(-[0-9a-z]+)/gi,"").replace(/([a-z]+\s[a-z]+\.\.)/gi, "");
+        let loginStatus = event.data.replace(/(,[0-9a-z]+)/gi,"").replace(/(-[0-9a-z]+)/gi,"").replace(/(\.[a-z]+)/gi,"");
+        let guid = event.data.replace(/([0-9a-z]+\s[0-9a-z]+..[0-9a-z]+,)/gi,"");
+        if(guid !== ""){
+            console.log(guid);
+            localStorage.setItem("guid",guid);
+        }
         if(role === "DM"){
             document.getElementById("DMControls").style.visibility = "visible";            
         }else{
@@ -91,10 +97,10 @@ socket.onclose = function (e) {
 window.onload = function () {
 
     document.getElementById("nextDayButton").addEventListener("click", function () {
-        socket.send("NextDay");
+        socket.send("NextDay,,,"+localStorage.getItem("guid"));
     });
     document.getElementById("rewindDayButton").addEventListener("click", function () {
-        socket.send("RewindDay");
+        socket.send("RewindDay,,,"+localStorage.getItem("guid"));
     });
     document.getElementById("Login").addEventListener("click", function () {
         socket.send("Login:"+document.getElementById("UserName").value+"."+document.getElementById("Password").value);
@@ -104,7 +110,7 @@ window.onload = function () {
     });
     document.getElementById("setDayButton").addEventListener("click", function () {
         if (document.getElementById("DayInput").value <= DaysInYear) {
-            socket.send("SetDay" + document.getElementById("DayInput").value);
+            socket.send("SetDay" + document.getElementById("DayInput").value+",,,"+localStorage.getItem("guid"));
         } else {
             alert("Please Enter Valid Numbers!")
         }
@@ -112,9 +118,9 @@ window.onload = function () {
 
     document.getElementById("setDateButton").addEventListener("click", function () {
         if (document.getElementById("MonthInput").value <= MonthsOfTheYear.length && document.getElementById("DayInput").value <= DaysInYear && document.getElementById("YearInput").value > 0) {
-            socket.send("SetYear" + document.getElementById("YearInput").value);
-            socket.send("SetMonth" + document.getElementById("MonthInput").value);
-            socket.send("SetDay" + document.getElementById("DayInput").value);
+            socket.send("SetYear" + document.getElementById("YearInput").value+",,,"+localStorage.getItem("guid"));
+            socket.send("SetMonth" + document.getElementById("MonthInput").value+",,,"+localStorage.getItem("guid"));
+            socket.send("SetDay" + document.getElementById("DayInput").value+",,,"+localStorage.getItem("guid"));
         } else {
             alert("Please Enter Valid Numbers!")
         }
