@@ -3,6 +3,9 @@ table, th, td {
     border: 1px solid black;
   }
 
+  #DMControls {
+    visibility: hidden;
+  }
 
 /* Slider Gubbins */
   .slider-container   {  

@@ -12,7 +12,17 @@ socket.onmessage = function (event) {
     if (typeof event.data === 'string' && event.data.startsWith('Calendar:')) {
         CreateCalendar(event.data);
     }
-
+    if (typeof event.data === 'string' && (event.data.startsWith('Login') || event.data.startsWith('Logout'))) {
+        let role = event.data.replace(/([a-z]+\s[a-z]+\.)/gi, "");
+        let loginStatus = event.data.replace(/(\.[a-z]+)/gi,"");
+        if(role === "DM"){
+            document.getElementById("DMControls").style.visibility = "visible";            
+        }else{
+            document.getElementById("DMControls").style.visibility = "hidden";
+        }
+        
+        document.getElementById("LoginStatus").innerText = loginStatus;
+    }
     if (typeof event.data === 'string' && event.data.startsWith('Date:')) {
         document.getElementById("CurrentDate").innerHTML = "The Current Date is " + event.data.replace("Date:", '');
 
@@ -85,6 +95,12 @@ window.onload = function () {
     });
     document.getElementById("rewindDayButton").addEventListener("click", function () {
         socket.send("RewindDay");
+    });
+    document.getElementById("Login").addEventListener("click", function () {
+        socket.send("Login:"+document.getElementById("UserName").value+"."+document.getElementById("Password").value);
+    });
+    document.getElementById("Logout").addEventListener("click", function () {
+        socket.send("LogOut:");
     });
     document.getElementById("setDayButton").addEventListener("click", function () {
         if (document.getElementById("DayInput").value <= DaysInYear) {

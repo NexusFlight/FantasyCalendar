@@ -10,27 +10,34 @@
 </head>
 
 <body>
-    <button id="rewindDayButton">Rewind Day</button>
-    <button id="nextDayButton">Next Day</button>
-    <button id="setDayButton">Set Day</button>
-    <input id="DayInput" placeholder="Day" />
-    <input id="MonthInput" placeholder="Month" />
-    <input id="YearInput" placeholder="Year" />
-    <button id="setDateButton">Set Date</button>
+    <div id="DMControls">
+        <button id="rewindDayButton">Rewind Day</button>
+        <button id="nextDayButton">Next Day</button>
+        <button id="setDayButton">Set Day</button>
+        <input id="DayInput" placeholder="Day" />
+        <input id="MonthInput" placeholder="Month" />
+        <input id="YearInput" placeholder="Year" />
+        <button id="setDateButton">Set Date</button>
+    </div>
+    <input id="UserName" placeholder="Username" />
+    <input id="Password" placeholder="Password" type="password" />
+    <button id="Login">login</button>
+    <button id="Logout">logout</button>
+    <p id="LoginStatus"></p>
 
     <div id="CurrentDate"></div>
 
     <div id="Calendar"></div>
     <div class="slider-container">
         <div class="slider-parent">
-            
-            <a href='#' class="slider-trigger">   Close   </a><br>
+
+            <a href='#' class="slider-trigger"> Close </a><br>
             <div id="event">
-            <h1 id="Title">Slider</h1>
-            <p id="Date"></p>
-            <p id="Occurance"></p>       
-            <p class="Description"></p>
-        </div>
+                <h1 id="Title">Slider</h1>
+                <p id="Date"></p>
+                <p id="Occurance"></p>
+                <p class="Description"></p>
+            </div>
         </div>
     </div>
 </body>

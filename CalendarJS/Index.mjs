@@ -29,17 +29,17 @@ wss.on('connection', (ws) => {
 
                 if (data === 'NextDay') {
                     calendar.ProgressOneDay();
-                } else if (data.includes("RewindDay")) {
+                } else if (data.startsWith("RewindDay")) {
                     calendar.RewindOneDay();
-                } else if (data.includes("HopBack")) {
+                } else if (data.startsWith("HopBack")) {
                     calendar.RewindDays(data.replace('HopBack', ''));
-                } else if (data.includes("HopDay")) {
+                } else if (data.startsWith("HopDay")) {
                     calendar.ProgressDays(data.replace('HopDay', ''));
-                } else if (data.includes("SetDay")) {
+                } else if (data.startsWith("SetDay")) {
                     calendar.SetDayOfCurrentMonth(data.replace('SetDay', ''));
-                } else if (data.includes("SetMonth")) {
+                } else if (data.startsWith("SetMonth")) {
                     calendar.SetMonth(data.replace('SetMonth', ''));
-                } else if (data.includes("SetYear")) {
+                } else if (data.startsWith("SetYear")) {
                     calendar.SetYear(data.replace('SetYear', ''));
                 }
 
@@ -47,18 +47,29 @@ wss.on('connection', (ws) => {
         }
         if (data.startsWith("Login:")) {
             let userAndCode = data.replace("Login:", '');
-            let userName = userAndCode.replace(/(\.[a-z0-9]+)/gi, '');
-            let userCode = userAndCode.replace(/([a-z0-9]+\.)/gi, '');
-            var user = fileHander.ReadUserFromFile(userName, userCode);
+            if (userAndCode !== ".") {
+                let userName = userAndCode.replace(/(\.[a-z0-9]+)/gi, '');
+                let userCode = userAndCode.replace(/([a-z0-9]+\.)/gi, '');
+                var user = fileHander.ReadUserFromFile(userName, userCode);
 
-            if (user !== -1) {
-                ws.send("Welcome " + user.UserName);
-                user.SetUserClient(wss.client);
-                Users.push(user);
-            } else {
-                ws.send("Login Unsuccessful");
+                if (user !== -1) {
+                    user.SetUserClient(wss.client);
+                    Users.push(user);
+                    ws.send("Login Successful." + user.UserRole);
+                } else {
+                    ws.send("Login Unsuccessful");
+                }
             }
-        } else if (data.includes("GetEvent")) {
+        } else if (data.startsWith("LogOut")) {
+            let user = Users.find(element => element.UserClient === wss.client);
+            let index = Users.indexOf(user);
+            let status = Users.splice(index, 1);
+            if (status) {
+                ws.send("Logout Successful");
+            } else {
+                ws.send("Logout Unsuccessful");
+            }
+        } else if (data.startsWith("GetEvent")) {
             let date = data.replace("GetEvent:", '');
             let annualDate = date.replace(/(\.[0-9]+)/g, ".-1");
             for (let i = 0; i < Events.length; i++) {
