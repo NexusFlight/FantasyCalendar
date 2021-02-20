@@ -7,4 +7,3 @@ TODO:<br>
 Add proper Database instead of File storage<br>
 Add Authorization that doesn't rely on unencrypted files (Good thing this is just a fun side project!)<br>
 Add start page to create calendar<br>
-Add EventID so I can delete a specific Event rather than the current Jank!<br>

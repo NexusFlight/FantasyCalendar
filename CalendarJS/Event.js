@@ -1,5 +1,6 @@
 class Event {
-    constructor(title,description,day,month,isAnnual,year = -1,) {
+    constructor(id, title, description, day, month, isAnnual, year = -1, ) {
+        this.EventID = id;
         this.EventTitle = title;
         this.EventDescription = description;
         this.EventDay = day;
@@ -8,8 +9,8 @@ class Event {
         this.IsAnnual = isAnnual;
     }
 
-    GetEventDate(){
-        return this.EventDay+','+this.EventMonth+'.'+this.EventYear;
+    GetEventDate() {
+        return this.EventDay + ',' + this.EventMonth + '.' + this.EventYear;
     }
 
 }
