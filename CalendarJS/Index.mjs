@@ -118,9 +118,8 @@ wss.on('connection', (ws) => {
 
             }
             if (!eventSent) {
-                let day = date.replace(/(,[0-9]+\.[A-Z]+)/gi, "");
-                let month = date.replace(/([0-9]+,)/g, "").replace(/(\.[A-Z]+)/gi, "");
-
+                let day = date.replace(/(,[0-9]+\.[0-9]+)/g, "");
+                let month = date.replace(/([0-9]+,)/g, "").replace(/(\.[0-9]+)/gi, "");
 
                 ws.send("EventData:" + JSON.stringify({ "EventTitle": "No Events", "EventDescription": "Use the Button at the top to add a new event", "EventDay": day, "EventMonth": month, "EventYear": -1, "IsAnnual": false }));
 

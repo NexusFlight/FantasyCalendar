@@ -8,7 +8,7 @@ var userRole = "";
 socket.onopen = function(e) {
     console.log("Connected to Backend");
     if (localStorage.getItem("guid") !== null) {
-        socket.send("CheckLogin,,," + localStorage.getItem("guid"));
+        SendWithGUID("CheckLogin");
     }
 }
 
@@ -103,20 +103,24 @@ socket.onclose = function(e) {
 window.onload = function() {
 
     document.getElementById("nextDayButton").addEventListener("click", function() {
-        socket.send("NextDay,,," + localStorage.getItem("guid"));
+        SendWithGUID("NextDay");
     });
+
     document.getElementById("rewindDayButton").addEventListener("click", function() {
-        socket.send("RewindDay,,," + localStorage.getItem("guid"));
+        SendWithGUID("RewindDay");
     });
+
     document.getElementById("Login").addEventListener("click", function() {
         socket.send("Login" + document.getElementById("UserName").value + "." + document.getElementById("Password").value);
     });
+
     document.getElementById("Logout").addEventListener("click", function() {
-        socket.send("LogOut,,," + localStorage.getItem("guid"));
+        SendWithGUID("LogOut");
     });
+
     document.getElementById("setDayButton").addEventListener("click", function() {
         if (document.getElementById("DayInput").value <= DaysInYear) {
-            socket.send("SetDay" + document.getElementById("DayInput").value + ",,," + localStorage.getItem("guid"));
+            SendWithGUID("SetDay" + document.getElementById("DayInput").value);
         } else {
             alert("Please Enter Valid Numbers!")
         }
@@ -131,46 +135,26 @@ window.onload = function() {
         }
     });
 
-    document.getElementById("SubmitEvent").addEventListener("click", function() {
-        var newEvent = document.getElementsByClassName("NewEventSpace")[0];
-        let slider = document.getElementsByClassName('slider-parent')[0];
-
-
-        if (userRole !== "") {
-            let title = document.getElementById("NewEventTitle").value;
-            let description = document.getElementById("NewEventDesc").value;
-            let isAnnual = document.getElementById("NewEventAnnual").checked;
-            let day = slider.getAttribute("day");
-            let month = slider.getAttribute("month");
-
-            socket.send("CreateEvent " + JSON.stringify({ "EventTitle": title, "EventDescription": description, "EventDay": parseInt(day), "EventMonth": parseInt(month), "EventYear": isAnnual ? -1 : CurrentYear, "IsAnnual": isAnnual }) + ",,," + localStorage.getItem("guid"));
-
-            if (slider.classList.contains("active")) {
-                slider.classList.remove("active");
-            } else {
-                slider.classList.add("active");
-            }
-            if (newEvent.classList.contains("active")) {
-                newEvent.classList.remove("active");
-            } else {
-                newEvent.classList.add("active");
-            }
-        } else {
-            alert("You need to be logged in to create events");
-        }
-    });
+    document.getElementById("SubmitEvent").addEventListener("click", function() { SubmitEvent(); });
 
     document.getElementById("setDateButton").addEventListener("click", function() {
         if (document.getElementById("MonthInput").value <= MonthsOfTheYear.length && document.getElementById("DayInput").value <= DaysInYear && document.getElementById("YearInput").value > 0) {
-            socket.send("SetYear" + document.getElementById("YearInput").value + ",,," + localStorage.getItem("guid"));
-            socket.send("SetMonth" + document.getElementById("MonthInput").value + ",,," + localStorage.getItem("guid"));
-            socket.send("SetDay" + document.getElementById("DayInput").value + ",,," + localStorage.getItem("guid"));
+            SendWithGUID("SetYear" + document.getElementById("YearInput").value);
+            SendWithGUID("SetMonth" + document.getElementById("MonthInput").value);
+            SendWithGUID("SetDay" + document.getElementById("DayInput").value);
         } else {
             alert("Please Enter Valid Numbers!")
         }
 
     });
 
+    SliderSetup();
+
+
+
+}
+
+function SliderSetup() {
     let slider = document.getElementsByClassName('slider-parent')[0];
     let slidertrigger = document.getElementsByClassName("slider-trigger");
     for (let i = 0; i < slidertrigger.length; i++) {
@@ -198,9 +182,35 @@ window.onload = function() {
         });
 
     }
+}
+
+function SubmitEvent() {
+    var newEvent = document.getElementsByClassName("NewEventSpace")[0];
+    let slider = document.getElementsByClassName('slider-parent')[0];
 
 
+    if (userRole !== "") {
+        let title = document.getElementById("NewEventTitle").value;
+        let description = document.getElementById("NewEventDesc").value;
+        let isAnnual = document.getElementById("NewEventAnnual").checked;
+        let day = slider.getAttribute("day");
+        let month = slider.getAttribute("month");
 
+        SendWithGUID("CreateEvent " + JSON.stringify({ "EventTitle": title, "EventDescription": description, "EventDay": parseInt(day), "EventMonth": parseInt(month), "EventYear": isAnnual ? -1 : CurrentYear, "IsAnnual": isAnnual }));
+
+        if (slider.classList.contains("active")) {
+            slider.classList.remove("active");
+        } else {
+            slider.classList.add("active");
+        }
+        if (newEvent.classList.contains("active")) {
+            newEvent.classList.remove("active");
+        } else {
+            newEvent.classList.add("active");
+        }
+    } else {
+        alert("You need to be logged in to create events");
+    }
 }
 
 function CreateCalendar(data) {
@@ -294,7 +304,6 @@ function CreateEventOnMessage(data) {
     let month = data.EventMonth;
     let year = data.EventYear;
 
-    console.log(data);
     slider.setAttribute("day", day);
     slider.setAttribute("month", month);
 
@@ -355,7 +364,6 @@ function CreateEventOnMessage(data) {
 
 
 function sendDeleteEvent(deleteButton) {
-    console.log(deleteButton);
     let slider = document.getElementsByClassName('slider-parent')[0];
     let day = slider.getAttribute("day");
     let month = slider.getAttribute("month")
@@ -404,6 +412,11 @@ function AddWeekNamesToTable(monthNumber) {
         dayNames.innerHTML = "<p>" + daysOfTheWeek[i] + "</p>";
         document.getElementById("tabler" + monthNumber).appendChild(dayNames);
     }
+}
+
+
+function SendWithGUID(message) {
+    socket.send(message + ",,," + localStorage.getItem("guid"));
 }
 
 function GetDayNumberWithOrdinal(dayNumber) {
