@@ -10,6 +10,10 @@ IsUserDM(){
     return (this.UserRole === "DM");
 }
 
+IsUserPlayer(){
+    return (this.UserRole === "Player");
+}
+
 SetUserClient(client){
     this.UserClient = client;
 }

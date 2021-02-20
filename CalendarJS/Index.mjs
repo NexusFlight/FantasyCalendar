@@ -1,6 +1,7 @@
 import WebSocket from './ws/index.js';
 import FileHander from './FileHandler.js';
 import User from './User.js';
+import Event from './Event.js';
 import { Guid } from 'js-guid';
 
 const wss = new WebSocket.Server({
@@ -11,9 +12,6 @@ var calendar = fileHander.ReadCalendarFromFile("Exandria");
 var Events = fileHander.ReadEventsFromFile("Events");
 var Users = [];
 
-//fileHander.SaveEventsToFile(Events,"Events");
-
-
 wss.on('connection', (ws) => {
 
     SendCalendarData(ws);
@@ -23,7 +21,7 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('message', (data) => {
-        let guid = data.replace(/([0-9a-z]+,,,)/gi, "");
+        let guid = data.replace(/(.+,,,)/gi, "");
         let location = data.indexOf(guid);
         if (location != 0) {
             data = data.substring(0, location - 3);
@@ -51,6 +49,19 @@ wss.on('connection', (ws) => {
                 }
 
             }
+            if (typeof user !== "undefined" && (user.IsUserPlayer() || user.IsUserDM())) {
+                console.log(user);
+                if (data.startsWith("CreateEvent")) {
+                    var json = JSON.parse(data.replace('CreateEvent', ''));
+                    Events.push(new Event(json.EventTitle, json.EventDescription, json.EventDay, json.EventMonth, json.IsAnnual, json.EventYear));
+                    fileHander.SaveEventsToFile(Events, "Events");
+                } else if (data.startsWith("CheckLogin")) {
+                    let user = Users.find(element => element.UserClient === guid);
+                    if (typeof user !== "undefined") {
+                        ws.send("Login Successful.." + user.UserRole + "," + user.UserClient);
+                    }
+                }
+            }
         }
         if (data.startsWith("Login")) {
             let userAndCode = data.replace("Login", '');
@@ -73,8 +84,6 @@ wss.on('connection', (ws) => {
         } else if (data.startsWith("LogOut")) {
             let user = Users.find(element => element.UserClient === guid);
             let status = -1;
-            console.log(user);
-            console.log(guid);
             if (typeof user !== "undefined") {
                 let index = Users.indexOf(user);
                 status = Users.splice(index, 1);
@@ -87,11 +96,21 @@ wss.on('connection', (ws) => {
         } else if (data.startsWith("GetEvent")) {
             let date = data.replace("GetEvent:", '');
             let annualDate = date.replace(/(\.[0-9]+)/g, ".-1");
+            let eventSent = false;
             for (let i = 0; i < Events.length; i++) {
                 let event = Events[i];
                 if (event.GetEventDate() === date || event.GetEventDate() === annualDate) {
                     ws.send("EventData:" + JSON.stringify(event));
+                    eventSent = true;
                 }
+
+            }
+            if (!eventSent) {
+                let day = date.replace(/(,[0-9]+\.[A-Z]+)/gi, "");
+                let month = date.replace(/([0-9]+,)/g, "").replace(/(\.[A-Z]+)/gi, "");
+
+
+                ws.send("EventData:" + JSON.stringify({ "EventTitle": "No Events", "EventDescription": "Use the Button at the top to add a new event", "EventDay": day, "EventMonth": month, "EventYear": -1, "IsAnnual": false }));
 
             }
         }
@@ -114,4 +133,3 @@ function SendCalendarData(client) {
         client.send("EventDate:" + Events[i].GetEventDate());
     }
 }
-

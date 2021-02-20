@@ -3,30 +3,33 @@ var daysOfTheWeek = [];
 var MonthsOfTheYear = [];
 var DaysInYear = -1;
 var CurrentYear = -1;
-socket.onopen = function (e) {
+socket.onopen = function(e) {
     console.log("Connected to Backend");
+    if (localStorage.getItem("guid") !== null) {
+        socket.send("CheckLogin,,," + localStorage.getItem("guid"));
+    }
 }
 
-socket.onmessage = function (event) {
-    
+socket.onmessage = function(event) {
+
     console.log(event.data);
     if (typeof event.data === 'string' && event.data.startsWith('Calendar:')) {
         CreateCalendar(event.data);
     }
     if (typeof event.data === 'string' && (event.data.startsWith('Login') || event.data.startsWith('Logout'))) {
-        let role = event.data.replace(/(,[0-9a-z]+)/gi,"").replace(/(-[0-9a-z]+)/gi,"").replace(/([a-z]+\s[a-z]+\.\.)/gi, "");
-        let loginStatus = event.data.replace(/(,[0-9a-z]+)/gi,"").replace(/(-[0-9a-z]+)/gi,"").replace(/(\.[a-z]+)/gi,"");
-        let guid = event.data.replace(/([0-9a-z]+\s[0-9a-z]+..[0-9a-z]+,)/gi,"");
-        if(guid !== ""){
+        let role = event.data.replace(/(,[0-9a-z]+)/gi, "").replace(/(-[0-9a-z]+)/gi, "").replace(/([a-z]+\s[a-z]+\.\.)/gi, "");
+        let loginStatus = event.data.replace(/(,[0-9a-z]+)/gi, "").replace(/(-[0-9a-z]+)/gi, "").replace(/(\.[a-z]+)/gi, "");
+        let guid = event.data.replace(/([0-9a-z]+\s[0-9a-z]+..[0-9a-z]+,)/gi, "");
+        if (guid !== "") {
             console.log(guid);
-            localStorage.setItem("guid",guid);
+            localStorage.setItem("guid", guid);
         }
-        if(role === "DM"){
-            document.getElementById("DMControls").style.visibility = "visible";            
-        }else{
+        if (role === "DM") {
+            document.getElementById("DMControls").style.visibility = "visible";
+        } else {
             document.getElementById("DMControls").style.visibility = "hidden";
         }
-        
+
         document.getElementById("LoginStatus").innerText = loginStatus;
     }
     if (typeof event.data === 'string' && event.data.startsWith('Date:')) {
@@ -90,37 +93,70 @@ socket.onmessage = function (event) {
 
 }
 
-socket.onclose = function (e) {
+socket.onclose = function(e) {
     console.log("connection closed please refresh");
 }
 
-window.onload = function () {
+window.onload = function() {
 
-    document.getElementById("nextDayButton").addEventListener("click", function () {
-        socket.send("NextDay,,,"+localStorage.getItem("guid"));
+    document.getElementById("nextDayButton").addEventListener("click", function() {
+        socket.send("NextDay,,," + localStorage.getItem("guid"));
     });
-    document.getElementById("rewindDayButton").addEventListener("click", function () {
-        socket.send("RewindDay,,,"+localStorage.getItem("guid"));
+    document.getElementById("rewindDayButton").addEventListener("click", function() {
+        socket.send("RewindDay,,," + localStorage.getItem("guid"));
     });
-    document.getElementById("Login").addEventListener("click", function () {
-        socket.send("Login"+document.getElementById("UserName").value+"."+document.getElementById("Password").value);
+    document.getElementById("Login").addEventListener("click", function() {
+        socket.send("Login" + document.getElementById("UserName").value + "." + document.getElementById("Password").value);
     });
-    document.getElementById("Logout").addEventListener("click", function () {
-        socket.send("LogOut,,,"+localStorage.getItem("guid"));
+    document.getElementById("Logout").addEventListener("click", function() {
+        socket.send("LogOut,,," + localStorage.getItem("guid"));
     });
-    document.getElementById("setDayButton").addEventListener("click", function () {
+    document.getElementById("setDayButton").addEventListener("click", function() {
         if (document.getElementById("DayInput").value <= DaysInYear) {
-            socket.send("SetDay" + document.getElementById("DayInput").value+",,,"+localStorage.getItem("guid"));
+            socket.send("SetDay" + document.getElementById("DayInput").value + ",,," + localStorage.getItem("guid"));
         } else {
             alert("Please Enter Valid Numbers!")
         }
     });
 
-    document.getElementById("setDateButton").addEventListener("click", function () {
+    document.getElementById("AddEvent").addEventListener("click", function() {
+        var newEvent = document.getElementsByClassName("NewEventSpace")[0];
+        if (newEvent.classList.contains("active")) {
+            newEvent.classList.remove("active");
+        } else {
+            newEvent.classList.add("active");
+        }
+    });
+
+    document.getElementById("SubmitEvent").addEventListener("click", function() {
+        var newEvent = document.getElementsByClassName("NewEventSpace")[0];
+        let slider = document.getElementsByClassName('slider-parent')[0];
+
+        let title = document.getElementById("NewEventTitle").value;
+        let description = document.getElementById("NewEventDesc").value;
+        let isAnnual = document.getElementById("NewEventAnnual").checked;
+        let day = slider.getAttribute("day");
+        let month = slider.getAttribute("month");
+
+        socket.send("CreateEvent " + JSON.stringify({ "EventTitle": title, "EventDescription": description, "EventDay": parseInt(day), "EventMonth": parseInt(month), "EventYear": isAnnual ? -1 : CurrentYear, "IsAnnual": isAnnual }) + ",,," + localStorage.getItem("guid"));
+
+        if (slider.classList.contains("active")) {
+            slider.classList.remove("active");
+        } else {
+            slider.classList.add("active");
+        }
+        if (newEvent.classList.contains("active")) {
+            newEvent.classList.remove("active");
+        } else {
+            newEvent.classList.add("active");
+        }
+    });
+
+    document.getElementById("setDateButton").addEventListener("click", function() {
         if (document.getElementById("MonthInput").value <= MonthsOfTheYear.length && document.getElementById("DayInput").value <= DaysInYear && document.getElementById("YearInput").value > 0) {
-            socket.send("SetYear" + document.getElementById("YearInput").value+",,,"+localStorage.getItem("guid"));
-            socket.send("SetMonth" + document.getElementById("MonthInput").value+",,,"+localStorage.getItem("guid"));
-            socket.send("SetDay" + document.getElementById("DayInput").value+",,,"+localStorage.getItem("guid"));
+            socket.send("SetYear" + document.getElementById("YearInput").value + ",,," + localStorage.getItem("guid"));
+            socket.send("SetMonth" + document.getElementById("MonthInput").value + ",,," + localStorage.getItem("guid"));
+            socket.send("SetDay" + document.getElementById("DayInput").value + ",,," + localStorage.getItem("guid"));
         } else {
             alert("Please Enter Valid Numbers!")
         }
@@ -131,23 +167,23 @@ window.onload = function () {
     let slidertrigger = document.getElementsByClassName("slider-trigger");
     for (let i = 0; i < slidertrigger.length; i++) {
         let element = slidertrigger[i];
-        element.addEventListener("click", function (el) {
+        element.addEventListener("click", function(el) {
             if (slider.classList.contains("active")) {
                 slider.classList.remove("active");
-                
+
                 for (let j = 0; j < MonthsOfTheYear.length; j++) {
-                    let monthDiv = document.getElementById("MonthDiv" + j);    
+                    let monthDiv = document.getElementById("MonthDiv" + j);
                     for (let i = 0; i < monthDiv.childElementCount; i++) {
                         if (monthDiv.children[i].getAttribute("event") == "Created") {
-                            monthDiv.children[i].setAttribute("event","");
+                            monthDiv.children[i].setAttribute("event", "");
                         }
-                    }                    
+                    }
                 }
 
                 let eventTag = document.getElementById("event")
-                eventTag.innerHTML =  "<h1 id='Title'>Slider</h1><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
+                eventTag.innerHTML = "<h1 id='Title'>Slider</h1><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
 
-                
+
             } else {
                 slider.classList.add("active");
             }
@@ -248,6 +284,10 @@ function CreateEventOnMessage(data) {
     let day = data.EventDay;
     let month = data.EventMonth;
     let year = data.EventYear;
+
+    slider.setAttribute("day", day);
+    slider.setAttribute("month", month);
+
 
     let monthDiv = document.getElementById("MonthDiv" + month);
     let childIndex = -1;
@@ -372,5 +412,3 @@ function GetDayNumberWithOrdinal(dayNumber) {
     }
     return dayPlusOrdinal;
 }
-
-
