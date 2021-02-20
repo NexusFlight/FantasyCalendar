@@ -50,11 +50,23 @@ wss.on('connection', (ws) => {
 
             }
             if (typeof user !== "undefined" && (user.IsUserPlayer() || user.IsUserDM())) {
-                console.log(user);
                 if (data.startsWith("CreateEvent")) {
                     var json = JSON.parse(data.replace('CreateEvent', ''));
                     Events.push(new Event(json.EventTitle, json.EventDescription, json.EventDay, json.EventMonth, json.IsAnnual, json.EventYear));
                     fileHander.SaveEventsToFile(Events, "Events");
+                } else if (data.startsWith("DeleteEvent")) {
+                    let json = JSON.parse(data.replace("DeleteEvent", ''));
+                    let day = json.Day;
+                    let month = json.Month;
+                    let eventTitle = json.Name;
+                    let eventYear = json.Year;
+                    let dayEvent = Events.find(e => e.EventDay == day && e.EventMonth == month && e.EventTitle == eventTitle && e.EventYear == eventYear);
+                    if (dayEvent !== []) {
+
+                        let index = Events.indexOf(dayEvent);
+                        Events.splice(index, 1);
+                        fileHander.SaveEventsToFile(Events, "Events");
+                    }
                 } else if (data.startsWith("CheckLogin")) {
                     let user = Users.find(element => element.UserClient === guid);
                     if (typeof user !== "undefined") {

@@ -12,7 +12,7 @@ socket.onopen = function(e) {
 
 socket.onmessage = function(event) {
 
-    console.log(event.data);
+    //console.log(event.data);
     if (typeof event.data === 'string' && event.data.startsWith('Calendar:')) {
         CreateCalendar(event.data);
     }
@@ -181,7 +181,7 @@ window.onload = function() {
                 }
 
                 let eventTag = document.getElementById("event")
-                eventTag.innerHTML = "<h1 id='Title'>Slider</h1><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
+                eventTag.innerHTML = "<h1 id='Title'></h1><a href='#' class='DeleteEvent'>Delete Event</a><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
 
 
             } else {
@@ -275,6 +275,7 @@ function CreateCalendar(data) {
 
 function CreateEventOnMessage(data) {
     let slider = document.getElementsByClassName('slider-parent')[0];
+    let deleteButton = document.getElementsByClassName('DeleteEvent')[0];
     let title = document.getElementById("Title");
     let date = document.getElementById("Date");
     let occurance = document.getElementById("Occurance");
@@ -305,18 +306,31 @@ function CreateEventOnMessage(data) {
         date.innerText = "Date: " + GetDayNumberWithOrdinal(data.EventDay) + " of " + MonthsOfTheYear[parseInt(data.EventMonth)];
         occurance.innerText = data.IsAnnual ? "Occurs Annually" : "Occurs Once";
         description.innerText = data.EventDescription;
+        deleteButton.setAttribute("onClick", "sendDeleteEvent(this)");
+        deleteButton.setAttribute("EventName", data.EventTitle);
+        deleteButton.setAttribute("EventIsAnnual", data.IsAnnual);
 
-        console.log(data);
         slider.classList.add("active");
         monthDiv.children[childIndex].setAttribute("event", "Created");
     } else {
         let oldDescriptions = document.getElementsByClassName("Description");
         let oldDescription = oldDescriptions[oldDescriptions.length - 1];
 
+
+
         let otherTitle = document.createElement("h1");
         otherTitle.id = "Title";
         otherTitle.innerText = data.EventTitle;
         oldDescription.appendChild(otherTitle);
+
+        let deleteEvent = document.createElement("a");
+        deleteEvent.className = "DeleteEvent";
+        deleteEvent.setAttribute("onClick", "sendDeleteEvent(this)");
+        deleteEvent.setAttribute("EventName", data.EventTitle);
+        deleteEvent.setAttribute("EventIsAnnual", data.IsAnnual);
+        deleteEvent.innerHTML = "Delete Event";
+        deleteEvent.href = "#";
+        otherTitle.parentNode.appendChild(deleteEvent);
 
         let otherOccurance = document.createElement("p");
         otherOccurance.id = "Occurance";
@@ -331,14 +345,37 @@ function CreateEventOnMessage(data) {
     }
 }
 
+
+
+function sendDeleteEvent(deleteButton) {
+    console.log(deleteButton);
+    let slider = document.getElementsByClassName('slider-parent')[0];
+    let day = slider.getAttribute("day");
+    let month = slider.getAttribute("month")
+
+    let eventName = deleteButton.getAttribute("EventName");
+    let isAnnual = deleteButton.getAttribute("EventIsAnnual");
+    console.log(isAnnual);
+    let json = JSON.stringify({ "Day": day, "Month": month, "Name": eventName, "Year": isAnnual === "true" ? -1 : CurrentYear });
+    let confirmr = confirm("Are you sure you want to delete this event?")
+    if (confirmr) {
+        socket.send("DeleteEvent " + json + ",,," + localStorage.getItem("guid"))
+
+        if (slider.classList.contains("active")) {
+            slider.classList.remove("active");
+        } else {
+            slider.classList.add("active");
+        }
+    }
+
+}
+
 function clickDay(e) {
 
-    console.log(e);
     let day = e.target.innerText;
     let month = e.target.parentElement.id.replace(/([a-z]|[A-Z])/g, '');
 
     let year = e.srcElement.getAttribute('year');
-    console.log('day ' + day + ' Month ' + month);
     socket.send("GetEvent:" + day + ',' + month + '.' + year);
 }
 
