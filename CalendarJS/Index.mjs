@@ -60,7 +60,7 @@ wss.on('connection', (ws) => {
                     let month = json.Month;
                     let eventID = json.ID;
                     let dayEvent = Events.find(e => e.EventDay == day && e.EventMonth == month && e.EventID == eventID);
-                    if (dayEvent !== []) {
+                    if (typeof dayEvent !== "undefined") {
 
                         let index = Events.indexOf(dayEvent);
                         Events.splice(index, 1);

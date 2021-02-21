@@ -31,7 +31,11 @@ socket.onmessage = function(event) {
         } else {
             document.getElementById("DMControls").style.visibility = "hidden";
         }
-        userRole = role;
+        if (role !== "Logout Successful.") {
+            userRole = role;
+        } else {
+            userRole = "";
+        }
 
         document.getElementById("LoginStatus").innerText = loginStatus;
     }
@@ -115,6 +119,7 @@ window.onload = function() {
     });
 
     document.getElementById("Logout").addEventListener("click", function() {
+
         SendWithGUID("LogOut");
     });
 
