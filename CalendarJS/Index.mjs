@@ -65,6 +65,7 @@ wss.on('connection', (ws) => {
                         let index = Events.indexOf(dayEvent);
                         Events.splice(index, 1);
                         fileHander.SaveEventsToFile(Events, "Events");
+                        ws.send("Event Deleted");
                     }
                 } else if (data.startsWith("CheckLogin")) {
                     let user = Users.find(element => element.UserClient === guid);

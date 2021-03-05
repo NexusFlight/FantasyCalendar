@@ -4,6 +4,7 @@ var MonthsOfTheYear = [];
 var DaysInYear = -1;
 var CurrentYear = -1;
 var userRole = "";
+var isCalendarDrawn = false;
 
 socket.onopen = function(e) {
     console.log("Connected to Backend");
@@ -64,7 +65,9 @@ socket.onmessage = function(event) {
 
         monthDiv.children[childIndex].style.backgroundColor = "red";
     }
-
+    if (typeof event.data === 'string' && event.data.startsWith('Event Deleted')) {
+        isCalendarDrawn = false;
+    }
     if (typeof event.data === 'string' && event.data.startsWith('Days:')) {
         daysOfTheWeek = event.data.replaceAll(',', ' ').replace('Days:', '').split(' ');
     }
@@ -219,90 +222,123 @@ function SubmitEvent() {
 }
 
 function CreateCalendar(data) {
-    if (document.getElementById("CalendarTable") !== null) {
-        document.getElementById("Calendar").innerHTML = "";
-    }
+    if (!isCalendarDrawn) {
 
-    let calendarData = data.replace("Calendar:", "").split(',');
-    DaysInYear = calendarData.length;
-    calendarData.pop();
-    let dayNumReg = /(\.[0-9])/g;
-    let weekNumReg = /([0-9]+\.)/g;
-    let monthNumber = 0;
-    //Create Master Table
-    let table = document.createElement("table");
-    table.id = "CalendarTable";
-    document.getElementById("Calendar").appendChild(table);
-
-    //Add first month to table headers
-    let monthName = document.createElement("th");
-    monthName.id = "MonthDiv" + monthNumber;
-    monthName.innerHTML = "<p>" + MonthsOfTheYear[monthNumber] + "</p>";
-    document.getElementById("CalendarTable").appendChild(monthName);
-
-    //Add row for weeknames
-    let tableRow = document.createElement("tr");
-    tableRow.id = "tabler" + monthNumber;
-    document.getElementById("MonthDiv" + monthNumber).appendChild(tableRow);
-
-
-    AddWeekNamesToTable(monthNumber);
-
-    //align the calendar
-    let weekNumber = calendarData[0].replace(weekNumReg, "");
-    AddBlankDays(weekNumber, monthNumber);
-
-    for (let i = 0; i < calendarData.length; i++) {
-        //add new row per week
-        if (calendarData[i].includes('\n')) {
-            calendarData[i] = calendarData[i].replaceAll("\n", "");
-            let weekGap = document.createElement("tr");
-            weekGap.id = "weekGap";
-            document.getElementById("MonthDiv" + monthNumber).appendChild(weekGap);
+        if (document.getElementById("CalendarTable") !== null) {
+            document.getElementById("Calendar").innerHTML = "";
         }
 
-        let dayNumber = calendarData[i].replace(dayNumReg, "");
-        weekNumber = calendarData[i].replace(weekNumReg, "");
+        let calendarData = data.replace("Calendar:", "").split(',');
+        DaysInYear = calendarData.length;
+        calendarData.pop();
+        let dayNumReg = /(\.[0-9])/g;
+        let weekNumReg = /([0-9]+\.)/g;
+        let monthNumber = 0;
+        //Create Master Table
+        let table = document.createElement("table");
+        table.id = "CalendarTable";
+        document.getElementById("Calendar").appendChild(table);
+
+        //Add first month to table headers
+        let monthName = document.createElement("th");
+        monthName.id = "MonthDiv" + monthNumber;
+        monthName.innerHTML = "<p>" + MonthsOfTheYear[monthNumber] + "</p>";
+        document.getElementById("CalendarTable").appendChild(monthName);
+
+        //Add row for weeknames
+        let tableRow = document.createElement("tr");
+        tableRow.id = "tabler" + monthNumber;
+        document.getElementById("MonthDiv" + monthNumber).appendChild(tableRow);
 
 
-        if (i > 1) {
-            //deal with end of month
-            let lastDayNumber = calendarData[i - 1].replace(dayNumReg, "");
-            if (parseInt(lastDayNumber) > parseInt(dayNumber)) {
-                //add new month header
-                monthNumber++;
-                monthName = document.createElement("th");
-                monthName.id = "MonthDiv" + monthNumber;
-                monthName.innerHTML = "<p>" + MonthsOfTheYear[monthNumber] + "</p>";
-                document.getElementById("CalendarTable").appendChild(monthName);
+        AddWeekNamesToTable(monthNumber);
 
-                //add the row to the month
-                let tableRow = document.createElement("tr");
-                tableRow.id = "tabler" + monthNumber;
-                document.getElementById("MonthDiv" + monthNumber).appendChild(tableRow);
+        //align the calendar
+        let weekNumber = calendarData[0].replace(weekNumReg, "");
+        AddBlankDays(weekNumber, monthNumber);
 
-
-                AddWeekNamesToTable(monthNumber);
-
-                AddBlankDays(weekNumber, monthNumber);
+        for (let i = 0; i < calendarData.length; i++) {
+            //add new row per week
+            if (calendarData[i].includes('\n')) {
+                calendarData[i] = calendarData[i].replaceAll("\n", "");
+                let weekGap = document.createElement("tr");
+                weekGap.id = "weekGap";
+                document.getElementById("MonthDiv" + monthNumber).appendChild(weekGap);
             }
-        }
 
-        let day = document.createElement("td");
-        day.id = "Day";
-        day.innerText = dayNumber;
-        day.addEventListener("click", clickDay);
-        document.getElementById("MonthDiv" + monthNumber).appendChild(day);
+            let dayNumber = calendarData[i].replace(dayNumReg, "");
+            weekNumber = calendarData[i].replace(weekNumReg, "");
+
+
+            if (i > 1) {
+                //deal with end of month
+                let lastDayNumber = calendarData[i - 1].replace(dayNumReg, "");
+                if (parseInt(lastDayNumber) > parseInt(dayNumber)) {
+                    //add new month header
+
+                    monthNumber++;
+                    if (monthNumber % 3 == 0) {
+                        let NewRow = document.getElementById("CalendarTable")
+                        NewRow = document.createElement("tr");
+                        document.getElementById("CalendarTable").appendChild(NewRow);
+
+                        monthName = document.createElement("th");
+                        monthName.id = "MonthDiv" + monthNumber;
+                        monthName.innerHTML = "<p>" + MonthsOfTheYear[monthNumber] + "</p>";
+                        document.getElementById("CalendarTable").appendChild(monthName);
+
+                        let tableRow = document.createElement("tr");
+                        tableRow.id = "tabler" + monthNumber;
+                        document.getElementById("MonthDiv" + monthNumber).appendChild(tableRow);
+
+
+                        AddWeekNamesToTable(monthNumber);
+
+                        AddBlankDays(weekNumber, monthNumber);
+                    } else {
+                        monthName = document.createElement("th");
+                        monthName.id = "MonthDiv" + monthNumber;
+                        monthName.innerHTML = "<p>" + MonthsOfTheYear[monthNumber] + "</p>";
+                        document.getElementById("CalendarTable").appendChild(monthName);
+                        let tableRow = document.createElement("tr");
+                        tableRow.id = "tabler" + monthNumber;
+                        document.getElementById("MonthDiv" + monthNumber).appendChild(tableRow);
+
+
+                        AddWeekNamesToTable(monthNumber);
+
+                        AddBlankDays(weekNumber, monthNumber);
+                    }
+
+                }
+            }
+
+            let day = document.createElement("td");
+            day.id = "Day";
+            day.innerText = dayNumber;
+            day.addEventListener("click", clickDay);
+            document.getElementById("MonthDiv" + monthNumber).appendChild(day);
+        }
+        isCalendarDrawn = true;
     }
 }
 
+
+
+
 function CreateEventOnMessage(data) {
     let slider = document.getElementsByClassName('slider-parent')[0];
+
+
+    let eventTag = document.getElementById("event")
+    eventTag.innerHTML = "<h1 id='Title'></h1><a href='#' class='DeleteEvent'>Delete Event</a><p id='Date'></p><p id='Occurance'></p><p class='Description'></p>";
+
     let deleteButton = document.getElementsByClassName('DeleteEvent')[0];
     let title = document.getElementById("Title");
     let date = document.getElementById("Date");
     let occurance = document.getElementById("Occurance");
     let description = document.getElementsByClassName("Description")[0];
+
 
     data = JSON.parse(data);
     let day = data.EventDay;
@@ -364,6 +400,8 @@ function CreateEventOnMessage(data) {
         otherOccurance.appendChild(otherDescription);
 
     }
+
+    monthDiv.children[childIndex].setAttribute("event", "");
 }
 
 
