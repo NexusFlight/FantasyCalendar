@@ -1,0 +1,14 @@
+{
+    "name": "calendarjs",
+    "version": "0.0.1",
+    "description": "Custom Calendars",
+    "main": "calendarjs/index.mjs",
+    "scripts": {
+        "start": "node calendarjs/index.mjs"
+    },
+    "author": "Andrew Smirthwaite",
+    "license": "ISC",
+    "dependencies": {
+        "js-guid": "^1.0.0"
+    }
+}
