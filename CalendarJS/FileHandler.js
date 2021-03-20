@@ -20,8 +20,9 @@ class FileHander {
         let fs = require('fs');
         let Calendar = require('./Calendar.js')
         let dir = "./calendars/";
+        let data = "";
         try {
-            let data = fs.readFileSync(dir + fileName + ".txt");
+            data = fs.readFileSync(dir + fileName + ".txt");
         } catch (error) {
             console.error(error)
         }
@@ -50,8 +51,9 @@ class FileHander {
         let fs = require('fs');
         let Event = require('./Event.js')
         let dir = "./events/";
+        let data = "";
         try {
-            let data = fs.readFileSync(dir + fileName + ".txt");
+            data = fs.readFileSync(dir + fileName + ".txt");
         } catch (error) {
             console.error(error)
         }
@@ -85,8 +87,9 @@ class FileHander {
         let fs = require('fs');
         let User = require('./User.js')
         let dir = "./Users/";
+        let data = "";
         try {
-            let data = fs.readFileSync(dir + userName + ".txt");
+            data = fs.readFileSync(dir + userName + ".txt");
         } catch (error) {
             console.error(error)
         }
