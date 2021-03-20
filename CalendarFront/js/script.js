@@ -1,4 +1,4 @@
-let socket = new WebSocket("ws://192.168.1.226:8080");
+let socket = new WebSocket("ws://217.155.205.250:8081");
 var daysOfTheWeek = [];
 var MonthsOfTheYear = [];
 var DaysInYear = -1;

@@ -20,8 +20,11 @@ class FileHander {
         let fs = require('fs');
         let Calendar = require('./Calendar.js')
         let dir = "./calendars/";
-
-        let data = fs.readFileSync(dir + fileName + ".txt");
+        try {
+            let data = fs.readFileSync(dir + fileName + ".txt");
+        } catch (error) {
+            console.error(error)
+        }
         let json = JSON.parse(data);
         return new Calendar(json.CalendarName, json.CurrentYear, json.DaysInMonths, json.MonthsInYear, json.DaysInYear, json.MonthNames, json.DayNames, json.DaysInWeek, json.MonthDays, json.LeapYearMonths, json.CurrentDay);
 
@@ -47,8 +50,11 @@ class FileHander {
         let fs = require('fs');
         let Event = require('./Event.js')
         let dir = "./events/";
-
-        let data = fs.readFileSync(dir + fileName + ".txt");
+        try {
+            let data = fs.readFileSync(dir + fileName + ".txt");
+        } catch (error) {
+            console.error(error)
+        }
         let json = JSON.parse(data);
         let events = [];
         for (let i = 0; i < json.length; i++) {
@@ -79,8 +85,11 @@ class FileHander {
         let fs = require('fs');
         let User = require('./User.js')
         let dir = "./Users/";
-
-        let data = fs.readFileSync(dir + userName + ".txt");
+        try {
+            let data = fs.readFileSync(dir + userName + ".txt");
+        } catch (error) {
+            console.error(error)
+        }
         let json = JSON.parse(data);
         if (json.UserCode === userCode) {
             return new User(json.UserName, json.UserCode, json.UserRole);
