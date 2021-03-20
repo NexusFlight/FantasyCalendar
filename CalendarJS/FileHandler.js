@@ -23,11 +23,13 @@ class FileHander {
         let data = "";
         try {
             data = fs.readFileSync(dir + fileName + ".txt");
+            let json = JSON.parse(data);
+            return new Calendar(json.CalendarName, json.CurrentYear, json.DaysInMonths, json.MonthsInYear, json.DaysInYear, json.MonthNames, json.DayNames, json.DaysInWeek, json.MonthDays, json.LeapYearMonths, json.CurrentDay);
+
         } catch (error) {
             console.error(error)
         }
-        let json = JSON.parse(data);
-        return new Calendar(json.CalendarName, json.CurrentYear, json.DaysInMonths, json.MonthsInYear, json.DaysInYear, json.MonthNames, json.DayNames, json.DaysInWeek, json.MonthDays, json.LeapYearMonths, json.CurrentDay);
+        return null;
 
     }
 
@@ -54,17 +56,18 @@ class FileHander {
         let data = "";
         try {
             data = fs.readFileSync(dir + fileName + ".txt");
+            let json = JSON.parse(data);
+            let events = [];
+            for (let i = 0; i < json.length; i++) {
+                let jsonEle = json[i];
+                events.push(new Event(jsonEle.EventID, jsonEle.EventTitle, jsonEle.EventDescription, jsonEle.EventDay, jsonEle.EventMonth, jsonEle.IsAnnual, jsonEle.EventYear));
+
+            }
+            return events;
         } catch (error) {
             console.error(error)
         }
-        let json = JSON.parse(data);
-        let events = [];
-        for (let i = 0; i < json.length; i++) {
-            let jsonEle = json[i];
-            events.push(new Event(jsonEle.EventID, jsonEle.EventTitle, jsonEle.EventDescription, jsonEle.EventDay, jsonEle.EventMonth, jsonEle.IsAnnual, jsonEle.EventYear));
-
-        }
-        return events;
+        return null;
     }
 
     SaveUserToFile(user) {
@@ -90,12 +93,14 @@ class FileHander {
         let data = "";
         try {
             data = fs.readFileSync(dir + userName + ".txt");
+
+            let json = JSON.parse(data);
+            if (json.UserCode === userCode) {
+                return new User(json.UserName, json.UserCode, json.UserRole);
+            }
+            return -1;
         } catch (error) {
             console.error(error)
-        }
-        let json = JSON.parse(data);
-        if (json.UserCode === userCode) {
-            return new User(json.UserName, json.UserCode, json.UserRole);
         }
         return -1;
     }
